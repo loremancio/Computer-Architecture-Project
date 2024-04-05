@@ -28,8 +28,10 @@ void bitonicSort(int *arr, int n) {
 
 int main(int argc, char **argv) {
     //size is 2^21
-    int arraySize = pow(2, atoi(argv[1]));  // Size of the array (2^arg elements)
-
+    int arraySize = pow(2, 10);
+    if (argc == 2) {
+        arraySize = pow(2, atoi(argv[1]));
+    }
     int *arr = new int[arraySize];
 
     for (int i = 0; i < arraySize; i++) {

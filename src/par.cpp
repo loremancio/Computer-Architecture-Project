@@ -34,7 +34,7 @@ void bitonicSortSerial(int *arr, int low, int count, bool direction) {
 void bitonicSortParallel(int *arr, int low, int count, bool direction, int threads) {
     if (count > 1) {
         int k = count / 2;
-        if (threads > 1 && count ) {
+        if (threads > 1) {
             // Use parallelism
             std::vector<std::thread> thread_pool;
             thread_pool.emplace_back(std::thread(bitonicSortParallel, arr, low, k, true, threads / 2));

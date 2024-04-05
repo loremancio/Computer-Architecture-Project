@@ -15,18 +15,17 @@ fi
 
 
 
-for ((i=10; i<=$num_exponenti; i++)); do
-    dir="results/par/$i"
+#per ogni thread da 1 a 24
+for ((i=1; i<=24; i++)); do
+    dir="results/par/thread-$i"
 
     mkdir -p $dir
-    for ((j=1; j<=$num_iterazioni; j++)); do
-        echo "Esecuzione $j/$num_iterazioni con esponente $(($i))"
+    #for each exponent
+    for ((j=10; j<=$num_exponenti; j++)); do
+        for ((k=1; k<=$num_iterazioni; k++)); do
+            echo "Esecuzione $k/$num_iterazioni con esponente $(($j)) e thread $i"
 
-        #genero il file di output
-        AMDuProfCLI collect --config tbp -o $dir src/par > /dev/null 2>&1
-
-
-
-
+            #genero il file di output
+            AMDuProfCLI collect --config threading -o $dir src/par $j $i > /dev/null 2>&1
+        done
     done
-done

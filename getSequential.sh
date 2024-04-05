@@ -23,7 +23,7 @@ for ((i=10; i<=$num_exponenti; i++)); do
         echo "Esecuzione $j/$num_iterazioni con esponente $(($i))"
 
         #genero il file di output
-        AMDuProfCLI collect --config tbp -o $dir src/seq > /dev/null 2>&1
+        AMDuProfCLI collect --config threading -o $dir src/seq $i > /dev/null 2>&1
 
 
 
