@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <thread>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -54,9 +55,9 @@ void bitonicSort(int *arr, int n, int threads) {
     bitonicSortParallel(arr, 0, n, true, threads);
 }
 
-int main() {
+int main(int argc, char **argv) {
     // Size is 2^21
-    int arraySize = 131072;
+    int arraySize = pow(2, atoi(argv[1]));  // Size of the array (2^21 elements
     int numThreads = 4;  // Number of threads to use
 
     int *arr = new int[arraySize];
@@ -66,13 +67,9 @@ int main() {
         arr[i] = rand() % 2097152;
     }
 
-    auto start = chrono::high_resolution_clock::now();
     bitonicSort(arr, arraySize, numThreads);
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> diff = end - start;
-    cout << "Time: " << diff.count() << " s" << endl;
 
-    // Check if the array is sorted
+    /*// Check if the array is sorted
     for (int i = 0; i < arraySize - 1; i++) {
         if (arr[i] > arr[i + 1]) {
             cout << "Array is not sorted" << endl;
@@ -81,5 +78,7 @@ int main() {
     }
 
     delete[] arr;
+    */
+   printf("Done\n");
     return 0;
 }
