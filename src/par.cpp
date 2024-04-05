@@ -34,7 +34,7 @@ void bitonicSortSerial(int *arr, int low, int count, bool direction) {
 void bitonicSortParallel(int *arr, int low, int count, bool direction, int threads) {
     if (count > 1) {
         int k = count / 2;
-        if (threads > 1 && count >= 8192) {
+        if (threads > 1 && count ) {
             // Use parallelism
             std::vector<std::thread> thread_pool;
             thread_pool.emplace_back(std::thread(bitonicSortParallel, arr, low, k, true, threads / 2));
@@ -58,7 +58,7 @@ void bitonicSort(int *arr, int n, int threads) {
 int main(int argc, char **argv) {
     // Size is 2^21
     int arraySize = pow(2, atoi(argv[1]));  // Size of the array (2^21 elements
-    int numThreads = 4;  // Number of threads to use
+    int numThreads = atoi(argv[2]);  // Number of threads
 
     int *arr = new int[arraySize];
 
@@ -76,9 +76,9 @@ int main(int argc, char **argv) {
             break;
         }
     }
-
-    delete[] arr;
     */
+    delete[] arr;
+    
    printf("Done\n");
     return 0;
 }
