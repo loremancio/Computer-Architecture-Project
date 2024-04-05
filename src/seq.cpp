@@ -3,6 +3,7 @@
 #include <ctime>
 #include <chrono>
 #include <algorithm>
+#include <cmath>    
 
 using namespace std;
 
@@ -25,9 +26,9 @@ void bitonicSort(int *arr, int n) {
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
     //size is 2^21
-    int arraySize = 16;
+    int arraySize = pow(2, atoi(argv[1]));  // Size of the array (2^arg elements)
 
     int *arr = new int[arraySize];
 
@@ -35,12 +36,9 @@ int main() {
         arr[i] = rand() % 2097152;
     }
 
-    auto start = chrono::high_resolution_clock::now();
     bitonicSort(arr, arraySize);
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> diff = end-start;
-    cout << "Time: " << diff.count() << " s" << endl;
 
+    /*
     //check if the array is sorted
     for (int i = 0; i < arraySize - 1; i++) {
         if (arr[i] > arr[i + 1]) {
@@ -52,7 +50,10 @@ int main() {
     for (int i = 0; i < arraySize; i++){
         cout << "[" << arr[i] << "]";
     }
-
     delete[] arr;
+
+    */
+
+
     return 0;
 }
