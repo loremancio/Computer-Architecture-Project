@@ -79,6 +79,5 @@ int main(int argc, char **argv) {
     */
     delete[] arr;
     
-   printf("Done\n");
     return 0;
 }
