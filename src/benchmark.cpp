@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
 
@@ -60,49 +61,39 @@ void bitonicSort(int *arr, int n, int threads) {
 }
 
 int main() {
-    int len[] = {64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
-    int threads[] = {1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22};
+    int array_lengths[] = {64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
+    int num_threads[] = {1, 2, 4, 8, 16, 32};
     int numTrials = 30; // Number of trials
 
-    FILE* report = fopen("report.txt", "a");
-    fprintf(report, "Format: Array size, Threads, Time\n");
+    // Open a file to write the report
+    ofstream report;
+    report.open("./src/results/report.txt");
+    report << "Format: Array size, Threads, Time\n";
 
-    for (int trial = 0; trial < numTrials; trial++) {
-        for (int i = 0; i < 11; i++) {
-            for (int j = 0; j < 12; j++) {
-                int arraySize = len[i];
-                int numThreads = threads[j];
-                int *arr = new int[arraySize];
-                srand(time(0));
-                for (int i = 0; i < arraySize; i++) {
+    //for every number of threads
+    for (int threads : num_threads) {
+        //for every array length
+        for (int n : array_lengths) {
+            double total_time = 0;
+            for (int trial = 0; trial < numTrials; trial++) {
+                int *arr = new int[n];
+                for (int i = 0; i < n; i++) {
                     arr[i] = rand() % 1000;
                 }
+
                 auto start = chrono::high_resolution_clock::now();
-                bitonicSort(arr, arraySize, numThreads);
+                bitonicSort(arr, n, threads);
                 auto end = chrono::high_resolution_clock::now();
                 chrono::duration<double> elapsed = end - start;
+                total_time += elapsed.count();
 
-                for (int i = 0; i < arraySize - 1; i++) {
-                    if (arr[i] > arr[i + 1]) {
-                        cout << "Array is not sorted" << endl;
-                        delete[] arr;
-                        return 0;
-                    }
-                }
                 delete[] arr;
-
-                //cout << "Array size: " << arraySize << " Threads: " << numThreads << " Time: " << elapsed.count() << endl;
-
-                FILE* report = fopen("report.txt", "a");
-                fprintf(report, "%d, %d, %f\n", arraySize, numThreads, elapsed.count());
             }
+            double avg_time = total_time / numTrials;
+            report << n << " " << threads << " " << avg_time << "\n";
         }
-        cout << "Trial " << trial + 1 << " completed" << endl;
-        
     }
 
+    report.close(); // Close the file
     return 0;
 }
-
-
-

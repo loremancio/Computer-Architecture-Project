@@ -8,6 +8,7 @@
 #include <cmath>
 
 using namespace std;
+int t = 0;
 
 void bitonicMerge(int *arr, int low, int count, bool direction) {
     if (count > 1) {
@@ -36,10 +37,12 @@ void bitonicSortParallel(int *arr, int low, int count, bool direction, int threa
         int k = count / 2;
         if (threads > 1) {
             // Use parallelism
+            t+=2;
+
             std::vector<std::thread> thread_pool;
             thread_pool.emplace_back(std::thread(bitonicSortParallel, arr, low, k, true, threads / 2));
             thread_pool.emplace_back(std::thread(bitonicSortParallel, arr, low + k, k, false, threads / 2));
-
+            cout << "Threads: "<< t <<"\n";
             for (auto& t : thread_pool) {
                 t.join();
             }
