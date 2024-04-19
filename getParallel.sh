@@ -34,5 +34,3 @@ for ((i=1; i<=6; i++)); do
 
 done
 
-prendere misurazioni ben fatte e plottare
-verificare eventuali flessioni per diversi thread al variare del carico

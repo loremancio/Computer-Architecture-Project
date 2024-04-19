@@ -38,17 +38,12 @@ void bitonicSortParallel(int *arr, int low, int count, bool direction, int threa
 
             // Use parallelism
             thread t1(bitonicSortParallel, arr, low, k, true, threads / 2);
-            thread t2(bitonicSortParallel, arr, low + k, k, false, threads / 2);
+            thread t2(bitonicSortParallel, arr, low + k, k, false, threads - threads / 2);
             t1.join();
             t2.join();
             bitonicMerge(arr, low, count, direction);
             
     } 
-}
-
-
-void bitonicSort(int *arr, int n, int threads) {
-    bitonicSortParallel(arr, 0, n, true, threads);
 }
 
 int main(int argc, char **argv) {
@@ -64,7 +59,7 @@ int main(int argc, char **argv) {
     }
 
     amdProfileResume();
-    bitonicSort(arr, arraySize, numThreads);
+    bitonicSortParallel(arr, 0, arraySize, true, numThreads);
     amdProfilePause();
 
 
@@ -75,6 +70,7 @@ int main(int argc, char **argv) {
             break;
         }
     }*/
+
     
     delete[] arr;
 
