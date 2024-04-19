@@ -1,25 +1,18 @@
 #include <iostream>
-#include <cstdlib>
-#include <ctime>
-#include <chrono>
-#include <algorithm>
 #include <thread>
 #include <vector>
 #include <cmath>
+#include "/opt/amduprof/include/AMDProfileController.h"
+
 
 using namespace std;
-int t = 0;
 
-void bitonicMerge(int *arr, int low, int count, bool direction) {
-    if (count > 1) {
-        int k = count / 2;
-        for (int i = low; i < low + k; i++) {
-            if ((arr[i] > arr[i + k]) == direction) {
-                swap(arr[i], arr[i + k]);
-            }
+void bitonicMerge(int arr[], int start, int length, bool direction) {
+    int mid = length / 2;
+    for (int i = start; i < start + mid; ++i) {
+        if ((arr[i] > arr[i + mid]) == direction) {
+            swap(arr[i], arr[i + mid]);
         }
-        bitonicMerge(arr, low, k, direction);
-        bitonicMerge(arr, low + k, k, direction);
     }
 }
 
@@ -33,26 +26,26 @@ void bitonicSortSerial(int *arr, int low, int count, bool direction) {
 }
 
 void bitonicSortParallel(int *arr, int low, int count, bool direction, int threads) {
-    if (count > 1) {
-        int k = count / 2;
-        if (threads > 1) {
-            // Use parallelism
-            t+=2;
 
-            std::vector<std::thread> thread_pool;
-            thread_pool.emplace_back(std::thread(bitonicSortParallel, arr, low, k, true, threads / 2));
-            thread_pool.emplace_back(std::thread(bitonicSortParallel, arr, low + k, k, false, threads / 2));
-            cout << "Threads: "<< t <<"\n";
-            for (auto& t : thread_pool) {
-                t.join();
-            }
-        } else {
-            bitonicSortSerial(arr, low, k, true);
-            bitonicSortSerial(arr, low + k, k, false);
-        }
-        bitonicMerge(arr, low, count, direction);
+    if (threads == 1 ||count <= 2048) {
+        // If array length is below threshold, execute serial sort
+        bitonicSortSerial(arr, low, count, direction);
+        return;
     }
+
+    else {
+        int k = count / 2;
+
+            // Use parallelism
+            thread t1(bitonicSortParallel, arr, low, k, true, threads / 2);
+            thread t2(bitonicSortParallel, arr, low + k, k, false, threads / 2);
+            t1.join();
+            t2.join();
+            bitonicMerge(arr, low, count, direction);
+            
+    } 
 }
+
 
 void bitonicSort(int *arr, int n, int threads) {
     bitonicSortParallel(arr, 0, n, true, threads);
@@ -70,17 +63,20 @@ int main(int argc, char **argv) {
         arr[i] = rand() % 2097152;
     }
 
+    amdProfileResume();
     bitonicSort(arr, arraySize, numThreads);
+    amdProfilePause();
 
-    /*// Check if the array is sorted
-    for (int i = 0; i < arraySize - 1; i++) {
+
+    // Check if the array is sorted
+    /*for (int i = 0; i < arraySize - 1; i++) {
         if (arr[i] > arr[i + 1]) {
             cout << "Array is not sorted" << endl;
             break;
         }
-    }
-    */
-    delete[] arr;
+    }*/
     
+    delete[] arr;
+
     return 0;
 }

@@ -14,18 +14,25 @@ if [ ! -d "$cartella" ]; then
 fi
 
 
-
 #per ogni thread da 1 a 24
-for ((i=1; i<=24; i++)); do
-    dir="results/par/thread-$i"
+for ((i=1; i<=6; i++)); do
+    threads=$((2 ** (i-1)))  # Calculate threads: 1, 2, 4, 8, 16, 32
+    dir="results/par/thread-$threads"
 
     mkdir -p $dir
     #for each exponent
     for ((j=10; j<=$num_exponenti; j++)); do
+        newDir="$dir/$j"
+        mkdir -p $newDir
         for ((k=1; k<=$num_iterazioni; k++)); do
-            echo "Esecuzione $k/$num_iterazioni con esponente $(($j)) e thread $i"
 
             #genero il file di output
-            AMDuProfCLI collect --config threading -o $dir src/par $j $i > /dev/null 2>&1
+            AMDuProfCLI collect --config threading -o $newDir src/par $j $threads > /dev/null 2>&1
         done
+        echo "Esponente $j/$num_exponenti con $threads threads terminata"
     done
+
+done
+
+prendere misurazioni ben fatte e plottare
+verificare eventuali flessioni per diversi thread al variare del carico
