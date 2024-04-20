@@ -1,15 +1,29 @@
 #include <iostream>
 #include <thread>
-#include <vector>
+#include <chrono>
 #include <cmath>
-
-
 using namespace std;
 
-void bitonicMerge(int arr[], int start, int length, bool direction) {
+void print_array(int arr[], int length) {
+    for (int i = 0; i < length; ++i) {
+        cout << arr[i]<<' ';
+    }
+    cout << endl;
+}
+
+/* check_array check if the array after the bitonic sort is properly sorted */
+void check_array(int arr[], int length) {
+    for (int i = 1; i < length; ++i) {
+        if(arr[i-1]>arr[i]){
+            exit(-1); // aborting the program if the array is not sorted
+        }
+    }
+}
+void bitonic_merge(int arr[], int start, int length, bool direction) {
+    //if (length == 1) return;
     int mid = length / 2;
     for (int i = start; i < start + mid; ++i) {
-        if ((arr[i] > arr[i + mid]) == direction) {
+        if ((arr[i] > arr[i + mid]) == direction) { // perform the swap in order to construct the sequence
             int temp = arr[i];
             arr[i]= arr[i+mid];
             arr[i+mid] = temp;
@@ -17,37 +31,31 @@ void bitonicMerge(int arr[], int start, int length, bool direction) {
     }
     if(mid == 1) // optimization: avoid a recursive call
         return;
-    bitonicMerge(arr, start, mid, direction);
-    bitonicMerge(arr, start + mid, mid, direction);
+    bitonic_merge(arr, start, mid, direction);
+    bitonic_merge(arr, start + mid, mid, direction);
 }
 
-void bitonicSortSerial(int arr[], int start, int length, bool direction) {
+void bitonic_sort(int arr[], int start, int length, bool direction) {
     if (length == 1) return;
     int mid = length / 2;
-    bitonicSortSerial(arr, start, mid, true); // ascending sequence 
-    bitonicSortSerial(arr, start + mid, mid, false); // discending sequence 
-    bitonicMerge(arr, start, length, direction); // create the bitonic sequence
+    bitonic_sort(arr, start, mid, true); // ascending sequence 
+    bitonic_sort(arr, start + mid, mid, false); // discending sequence 
+    bitonic_merge(arr, start, length, direction); // create the bitonic sequence
 }
 
-void bitonicSortParallel(int *arr, int low, int count, bool direction, int threads) {
-
-    if (threads < 2) {
-        // If array length is below threshold, execute serial sort
-        bitonicSortSerial(arr, low, count, direction);
-        return;
-    }
-
-    else {
-        int k = count / 2;
-
-        // Use parallelism
-        thread t1(bitonicSortParallel, arr, low, k, true, threads / 2);
-        thread t2(bitonicSortParallel, arr, low + k, k, false, threads - threads / 2);
+// entry point function for the bitonic_sort
+void parallel_bitonic_sort(int arr[], int start, int length, bool direction, int num_threads) {
+    if (num_threads == 1) { // call the bitonic_sort and create the bitonic sequence 
+        bitonic_sort(arr, start, length, direction);
+    } else {
+        int mid = length / 2;
+        thread t1(parallel_bitonic_sort, ref(arr), start, mid, true, num_threads / 2); // the first thread call recursively the function with first half of the array
+        thread t2(parallel_bitonic_sort, ref(arr), start + mid, mid, false, num_threads - num_threads / 2);  // the second thread call recursively the function with second half of array
         t1.join();
         t2.join();
-        bitonicMerge(arr, low, count, direction);
-            
-    } 
+        
+        bitonic_merge(arr, start, length, direction);  // perform the bitonic sequence merge and finalize the sort
+    }
 }
 
 int main(int argc, char **argv) {
@@ -62,8 +70,13 @@ int main(int argc, char **argv) {
         arr[i] = rand() % 2097152;
     }
 
-    bitonicSortParallel(arr, 0, arraySize, true, numThreads);
+    auto start = chrono::high_resolution_clock::now();
+    parallel_bitonic_sort(arr, 0, arraySize, true, numThreads);
+    auto end = chrono::high_resolution_clock::now();
 
+    chrono::duration<double> elapsed = end - start;
+    
+    cout << elapsed.count() << endl;
 
     // Check if the array is sorted
     /*for (int i = 0; i < arraySize - 1; i++) {
