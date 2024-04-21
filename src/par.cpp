@@ -50,7 +50,7 @@ void parallel_bitonic_sort(int arr[], int start, int length, bool direction, int
     } else {
         int mid = length / 2;
         thread t1(parallel_bitonic_sort, ref(arr), start, mid, true, num_threads / 2); // the first thread call recursively the function with first half of the array
-        thread t2(parallel_bitonic_sort, ref(arr), start + mid, mid, false, num_threads - num_threads / 2);  // the second thread call recursively the function with second half of array
+        thread t2(parallel_bitonic_sort, ref(arr), start + mid, mid, false, num_threads / 2);  // the second thread call recursively the function with second half of array
         t1.join();
         t2.join();
         
