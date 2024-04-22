@@ -3,20 +3,18 @@
 allowed_strings=("par" "parO2" "parM" "parMO2")
 
 
-# Check if an argument is provided
-if [ $# -eq 0 ]; then
-  echo "Error: Please provide a string as input."
-  exit 1
-fi
-
 input_string="$1"
 
 #check if the input string is -h or --help
-if [ "$input_string" == "-h" ] || [ "$input_string" == "--help" ]; then
+if [ "$input_string" == "-h" ] || [ "$input_string" == "--help" ] || [ $# -eq 0 ]; then
   echo "Usage: $0 [par|parO2|parM|parMO2] [numberOfExponents] [numOfIterations] [numOfThreads]"
+  echo "Default values:"
+  echo "  numberOfExponents: 24"
+  echo "  numOfIterations: 30"
+  echo "  numOfThreads: 24"
   echo
   echo "For multiple runs, use && to separate the commands, e.g."
-    echo "  bash test.sh [par|parO2|parM|parMO2] && bash plot.sh [par|parO2|parM|parMO2] && ..."
+    echo "  $0 [par|parO2|parM|parMO2] && $0 [par|parO2|parM|parMO2] && ..."
   exit 0
 fi
 
