@@ -19,7 +19,8 @@ void check_array(int arr[], int length) {
         }
     }
 }
-void bitonic_merge(int arr[], int start, int length, bool direction) {
+
+void bitonic_merge(int arr[], int start, int length, bool direction) { 
     //if (length == 1) return;
     int mid = length / 2;
     for (int i = start; i < start + mid; ++i) {
@@ -33,6 +34,31 @@ void bitonic_merge(int arr[], int start, int length, bool direction) {
         return;
     bitonic_merge(arr, start, mid, direction);
     bitonic_merge(arr, start + mid, mid, direction);
+}
+
+void parallel_bitonic_merge(int arr[], int start, int length, bool direction, int num_threads) {
+    
+    if (length == 1) {
+        return;
+    }
+    int mid = length / 2;
+    for (int i = start; i < start + mid; ++i) {
+        if ((arr[i] > arr[i + mid]) == direction) {
+            int temp = arr[i];
+            arr[i] = arr[i + mid];
+            arr[i + mid] = temp;
+        }
+    }
+
+    if (num_threads > 1) { 
+        int new_threads = num_threads / 2;
+        thread t1(parallel_bitonic_merge, arr, start, mid, direction, new_threads); // optimized version with multithreading in the merge phase, same three structure of recursive call
+        thread t2(parallel_bitonic_merge, arr, start + mid, mid, direction, num_threads - new_threads);
+        t1.join();
+        t2.join();
+    } else {
+        bitonic_merge(arr, start, length, direction);
+    }
 }
 
 void bitonic_sort(int arr[], int start, int length, bool direction) {
@@ -54,7 +80,7 @@ void parallel_bitonic_sort(int arr[], int start, int length, bool direction, int
         t1.join();
         t2.join();
         
-        bitonic_merge(arr, start, length, direction);  // perform the bitonic sequence merge and finalize the sort
+        parallel_bitonic_merge(arr, start, length, direction, num_threads);  // perform the bitonic sequence merge and finalize the sort
     }
 }
 
