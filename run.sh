@@ -47,7 +47,6 @@ fi
 
 echo "Running $input_string with $numberOfExponents exponents, $numOfIterations iterations, and $numOfThreads threads"
 
-exit 0
 
 # Create the directory if it does not exist
 if [ ! -d "results/$input_string" ]; then
@@ -57,9 +56,8 @@ fi
 for ((i=1; i<=$numOfThreads; i++)); do
   threads=$i
   dir="results/$input_string/$threads"
-
   mkdir -p $dir
-  for ((j=10; j<=$numberOfExponents; j++)); do
+  for ((j=8; j<=$numberOfExponents; j++)); do
     filePath="$dir/$j.txt"
     for ((k=1; k<=$numOfIterations; k++)); do
       ./binaries/$input_string $j $threads >> $filePath
