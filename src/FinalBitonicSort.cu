@@ -78,7 +78,7 @@ __global__ void bitonic_sort_kernel(int *arr, unsigned long long distance, unsig
   bitonic_sort performs the operations to sort the array 
   it takes as input the array to sort and its lenght
   */
-void bitonic_sort(int *arr, unsigned long long array_size){
+void bitonic_sort(int *arr, unsigned long long array_size, int numThreads){
     int *cuda_arr; // device array
     size_t size = array_size * sizeof(int); // size * 4 byte
     
@@ -88,8 +88,7 @@ void bitonic_sort(int *arr, unsigned long long array_size){
     cudaMemcpy(cuda_arr, arr, size, cudaMemcpyHostToDevice); 
 
     //set the number of threads per blocks and calculate the number of blocks
-    int thread_dim=128;
-    int block_dim=(array_size + thread_dim - 1) / thread_dim;
+    int block_dim=(array_size + numThreads - 1) / numThreads;
 
     
     unsigned long long distance, subSequence_size; 
@@ -105,7 +104,7 @@ void bitonic_sort(int *arr, unsigned long long array_size){
     //of decending dimention
     for (subSequence_size = 2; subSequence_size <= array_size; subSequence_size <<= 1) 
       for (distance = subSequence_size >> 1; distance > 0; distance = distance >> 1)        
-        bitonic_sort_kernel<<<block_dim, thread_dim>>>(cuda_arr, distance, subSequence_size);
+        bitonic_sort_kernel<<<block_dim, numThreads>>>(cuda_arr, distance, subSequence_size);
         
     //calculate elapsed time withouth the cudaMemcpy
     cudaEventRecord(stop, 0);
@@ -114,7 +113,7 @@ void bitonic_sort(int *arr, unsigned long long array_size){
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
 
-    printf("The elapsedtime in GPU without memcopy was: %.3f ms\n", elapsed);
+    printf("%f,", elapsed);
     
     //copy back to the host array
     cudaMemcpy(arr, cuda_arr, size, cudaMemcpyDeviceToHost); 
@@ -127,7 +126,13 @@ int main(int argc, char** argv){
 
 
   int arraySize = pow(2, atoi(argv[1]));  // Size of the array (2^21 elements
-  int numThreads = atoi(argv[2]);  // Number of threads
+  unsigned int numThreads = atoi(argv[2]);  // Number of threads
+  //if the number of threads is not a power of 2 return an error
+  if ((numThreads & (numThreads - 1)) != 0) {
+    printf("The number of threads must be a power of 2\n");
+    return 1;
+  }
+
   int *arr = new int[arraySize];
 
   srand(time(0));
@@ -145,7 +150,7 @@ int main(int argc, char** argv){
   cudaEventCreate(&outExt);
   cudaEventRecord(startExt, 0);
   //=========================================//
-  bitonic_sort(arr, array_size);
+  bitonic_sort(arr, arraySize, numThreads);
   //=========================================//
   cudaEventRecord(outExt, 0);
   cudaEventSynchronize(outExt);
@@ -154,5 +159,5 @@ int main(int argc, char** argv){
   cudaEventDestroy(outExt);
 
 
-  printf("%.3f\n", elapsed);
+  printf("%f\n", elapsed);
 }
