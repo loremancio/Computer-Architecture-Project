@@ -103,7 +103,7 @@ void bitonic_sort(int *arr, unsigned long long array_size, int numThreads){
     //iterate through the array sorting sequence of ascending dimention over distances
     //of decending dimention
     for (subSequence_size = 2; subSequence_size <= array_size; subSequence_size <<= 1) 
-      for (distance = subSequence_size >> 1; distance > 0; distance = distance >> 1)        
+      for (distance = subSequence_size >> 1; distance > 0; distance >>= 1)        
         bitonic_sort_kernel<<<block_dim, numThreads>>>(cuda_arr, distance, subSequence_size);
         
     //calculate elapsed time withouth the cudaMemcpy
@@ -113,7 +113,7 @@ void bitonic_sort(int *arr, unsigned long long array_size, int numThreads){
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
 
-    printf("%f,", elapsed);
+    printf("%f,", elapsed / 1000);
     
     //copy back to the host array
     cudaMemcpy(arr, cuda_arr, size, cudaMemcpyDeviceToHost); 
@@ -123,7 +123,6 @@ void bitonic_sort(int *arr, unsigned long long array_size, int numThreads){
 }
 
 int main(int argc, char** argv){
-
 
   int arraySize = pow(2, atoi(argv[1]));  // Size of the array (2^21 elements
   unsigned int numThreads = atoi(argv[2]);  // Number of threads
@@ -159,5 +158,5 @@ int main(int argc, char** argv){
   cudaEventDestroy(outExt);
 
 
-  printf("%f\n", elapsed);
+  printf("%f\n", elapsed / 1000);
 }
